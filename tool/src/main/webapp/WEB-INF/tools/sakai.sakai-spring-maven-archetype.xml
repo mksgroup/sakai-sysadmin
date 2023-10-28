@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<registration>
+	<tool id="sakai.sysadmin" 
+		title="sysadmin" 
+		description="This description is set in the sysadmin-tool registration file, found in the webapp/tools directory">
+
+		<category name="course" />
+      	<category name="project" />
+
+		<configuration name="functions.require" /> 
+		
+    </tool>
+</registration>
+
