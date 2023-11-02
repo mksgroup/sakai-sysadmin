@@ -109,11 +109,16 @@ public class HomeController extends BaseController {
 			Model model) {
 		ModelAndView mav = new ModelAndView("upload_file");
 		initSession(request, httpSession);
-		
-		String nameFileUploaded = uploadFile(multipartFile, folderUpload);
-		mav.addObject("nameFileUploaded",nameFileUploaded);
+
+		String bkFilename = saveUploadedFile(multipartFile, folderUpload);
+		if (bkFilename != null) {
+			mav.addObject("bkFilename", bkFilename);
+		}
+		mav.addObject("nameFileUploaded", multipartFile.getOriginalFilename());
+
 		mav.addObject("listFiles", getListFiles(folderUpload));
 		mav.addObject("listFilesBackup", getListFiles(binFolder));
+
 		return mav;
 	}
 
@@ -194,36 +199,62 @@ public class HomeController extends BaseController {
         return listNameFiles;
 	}
 	
-	private String uploadFile(MultipartFile multipartFile, String folderUpload) {
-		String fileName = renameIfFileExists(multipartFile.getOriginalFilename(), folderUpload);
-		if(multipartFile != null) {
-			String filePath = folderUpload  + fileName;
-		File file = new File(filePath);
-		    try {
-				multipartFile.transferTo(file);
-				log.info("1 file uploaded with path: "+ filePath);
-			} catch (IllegalStateException | IOException e) {
-				log.warn("Error when upload file : "+ e.getMessage());
-			}
-		}
-		return fileName;
-	}
-	
-	private String renameIfFileExists(String fileName, String folder) {
-        
-        String filePath = folder + File.separator + fileName;
-        File file = new File(filePath);
-        
-        if (file.exists()) {
-        	int seperator = fileName.lastIndexOf(".");
-        	String extension = fileName.substring(seperator);
+	/**
+	 * Save the uploaded file to disk.
+	 * @param multipartFile uploaded file object.
+	 * @param folderUpload folder will contain the uploaded file.
+	 * @return null if the name of uploaded is not existed in the folder.
+	 * Otherwise, the new name of backup file is returned.
+	 */
+	private String saveUploadedFile(MultipartFile multipartFile, String folderUpload) {
+		String fileName = multipartFile.getOriginalFilename();
 
-            String name = fileName.substring(0, seperator);
-            String currentTime = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            return name + "_" + currentTime + extension;
-        }
-        return fileName;
-    }
+		if (multipartFile != null) {
+			String newName = renameExistedFile(multipartFile.getOriginalFilename(), folderUpload);
+			String filePath = folderUpload + fileName;
+			File file = new File(filePath);
+
+			try {
+				multipartFile.transferTo(file);
+				log.info("1 file uploaded with path: " + filePath);
+			} catch (IllegalStateException | IOException e) {
+				log.warn("Error when upload file : " + e.getMessage());
+			}
+			
+			return newName;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Rename existing file to backup. The pattern of new name is: <old name>_yyyyMMdd_HHmmss.<old ext>.
+	 * @param fileName file name to be checked to rename.
+	 * @param folder folder contains file
+	 * @return new name of file.
+	 * null in case of the file of fileName is not existed.
+	 */
+	private String renameExistedFile(String fileName, String folder) {
+
+		String filePath = folder + File.separator + fileName;
+		File file = new File(filePath);
+
+		if (file.exists()) {
+			int seperator = fileName.lastIndexOf(".");
+			String extension = fileName.substring(seperator);
+
+			String name = fileName.substring(0, seperator);
+			String currentTime = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+			String newName= name + "_" + currentTime + extension;
+			
+			boolean renameOK = file.renameTo(new File(folder + File.separator + newName));
+			log.info("Renamed is " + renameOK);
+			
+			return newName;
+		} else {
+			return null;
+		}
+	}
 
 
 	private void copyFile( String targetFolder, String sourceFolder, String fileName) {

@@ -33,12 +33,6 @@
 			<artifactId>sakai-kernel-api</artifactId>
 		</dependency>
 
-
-		<dependency>
-			<groupId>com.example</groupId>
-			<artifactId>demo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<!-- configure the build to use the standard maven structure -->

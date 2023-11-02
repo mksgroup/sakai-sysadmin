@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>The generated source code Web Application for Sakai</title>
+<title>Upload file</title>
 <!-- Latest compiled and minified CSS -->
 
 <!-- Bootstrap CSS -->
@@ -185,6 +185,10 @@
 		        <div class="mb-3">
 				  <h6>File has been upload successfully!</h6>
 				  <span id="nameFileUploaded"></span>
+				</div>
+		        <div class="mb-3" th:if="${bkFilename != null}">
+				  <h6>The existing file is renamed to:</h6>
+				  <span th:text="${bkFilename}"></span>
 				</div>
 		      </div>
 		    </form>
