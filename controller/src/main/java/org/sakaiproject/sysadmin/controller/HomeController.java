@@ -21,18 +21,11 @@ package org.sakaiproject.sysadmin.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.sakaiproject.sysadmin.common.FileUtility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -96,8 +90,8 @@ public class HomeController extends BaseController {
 		initSession(request, httpSession);
 		mav.addObject("currentSiteId", getCurrentSiteId());
 		mav.addObject("userDisplayName", getCurrentUserDisplayName());
-		mav.addObject("listFiles", getListFiles(folderUpload));
-		mav.addObject("listFilesBackup", getListFiles(binFolder));
+		mav.addObject("listFiles", FileUtility.getListFiles(folderUpload));
+		mav.addObject("listFilesBackup", FileUtility.getListFiles(binFolder));
 		return mav;
 	}
 	
@@ -108,7 +102,7 @@ public class HomeController extends BaseController {
 			HttpSession httpSession,
 			Model model) {
 		ModelAndView mav = new ModelAndView("upload_file");
-		initSession(request, httpSession);
+		// initSession(request, httpSession);
 
 		String bkFilename = saveUploadedFile(multipartFile, folderUpload);
 		if (bkFilename != null) {
@@ -116,8 +110,8 @@ public class HomeController extends BaseController {
 		}
 		mav.addObject("nameFileUploaded", multipartFile.getOriginalFilename());
 
-		mav.addObject("listFiles", getListFiles(folderUpload));
-		mav.addObject("listFilesBackup", getListFiles(binFolder));
+		mav.addObject("listFiles", FileUtility.getListFiles(folderUpload));
+		mav.addObject("listFilesBackup", FileUtility.getListFiles(binFolder));
 
 		return mav;
 	}
@@ -125,7 +119,7 @@ public class HomeController extends BaseController {
 	@RequestMapping(value = "/move-to-bin", method = RequestMethod.GET)
 	public ModelAndView doDeleteFile(@RequestParam(name = "fileName") String fileName) {
 		ModelAndView mav = new ModelAndView("redirect:/upload-file");
-		copyFile(binFolder, folderUpload, fileName);
+		FileUtility.copyFile(binFolder, folderUpload, fileName);
 		return mav;
 	}
 	
@@ -159,7 +153,7 @@ public class HomeController extends BaseController {
 		}else {
 			log.warn("Can't find path {}", bucket);
 		}
-		byte[] files = getFile(filePath);
+		byte[] files = FileUtility.getFile(filePath);
 		return ResponseEntity.ok()
 				.contentType(MediaType.valueOf("image/png"))
 				.body(files);
@@ -168,7 +162,7 @@ public class HomeController extends BaseController {
 	@RequestMapping(value = "/restore-file/{fileName}", method = RequestMethod.GET)
 	public ModelAndView restoreFile(@PathVariable(name = "fileName") String fileName) {
 		ModelAndView mav = new ModelAndView("redirect:/upload-file"); 
-		copyFile(folderUpload, binFolder, fileName);
+		FileUtility.copyFile(folderUpload, binFolder, fileName);
 		return mav;
 	}
 	
@@ -184,21 +178,6 @@ public class HomeController extends BaseController {
 		return mav;
 	}
 	
-	
-	private List<String> getListFiles(String folder){
-		List<String> listNameFiles = new ArrayList<>();
-		File directory = new File(folder);
-		if (directory.exists() && directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-            	listNameFiles = Arrays.stream(files)
-                        .filter(File::isFile)
-                        .map(File::getName).collect(Collectors.toList());
-            }
-        }
-        return listNameFiles;
-	}
-	
 	/**
 	 * Save the uploaded file to disk.
 	 * @param multipartFile uploaded file object.
@@ -206,11 +185,11 @@ public class HomeController extends BaseController {
 	 * @return null if the name of uploaded is not existed in the folder.
 	 * Otherwise, the new name of backup file is returned.
 	 */
-	private String saveUploadedFile(MultipartFile multipartFile, String folderUpload) {
+	private static String saveUploadedFile(MultipartFile multipartFile, String folderUpload) {
 		String fileName = multipartFile.getOriginalFilename();
 
 		if (multipartFile != null) {
-			String newName = renameExistedFile(multipartFile.getOriginalFilename(), folderUpload);
+			String newName = FileUtility.renameExistedFile(multipartFile.getOriginalFilename(), folderUpload);
 			String filePath = folderUpload + fileName;
 			File file = new File(filePath);
 
@@ -226,70 +205,4 @@ public class HomeController extends BaseController {
 
 		return null;
 	}
-
-	/**
-	 * Rename existing file to backup. The pattern of new name is: <old name>_yyyyMMdd_HHmmss.<old ext>.
-	 * @param fileName file name to be checked to rename.
-	 * @param folder folder contains file
-	 * @return new name of file.
-	 * null in case of the file of fileName is not existed.
-	 */
-	private String renameExistedFile(String fileName, String folder) {
-
-		String filePath = folder + File.separator + fileName;
-		File file = new File(filePath);
-
-		if (file.exists()) {
-			int seperator = fileName.lastIndexOf(".");
-			String extension = fileName.substring(seperator);
-
-			String name = fileName.substring(0, seperator);
-			String currentTime = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-			String newName= name + "_" + currentTime + extension;
-			
-			boolean renameOK = file.renameTo(new File(folder + File.separator + newName));
-			log.info("Renamed is " + renameOK);
-			
-			return newName;
-		} else {
-			return null;
-		}
-	}
-
-
-	private void copyFile( String targetFolder, String sourceFolder, String fileName) {
-		String sourcePath = sourceFolder + File.separator + fileName;
-		File sourceFile = new File(sourcePath);
-		if(sourceFile.exists() && sourceFile.isFile()) {
-			try {
-				Path targetPath = Paths.get(targetFolder + File.separator + fileName);
-				byte[] newFile = Files.readAllBytes(new File(sourcePath).toPath());
-				Files.createDirectories(targetPath.getParent());
-				Files.write(targetPath, newFile);
-				
-				log.info("Move file with name : {} to folder : {}", fileName, targetFolder);
-			} catch (IOException e) {
-				log.warn("Error when move file : "+ e.getMessage());
-			}
-			sourceFile.delete();
-		}
-	}
-	
-	
-	private byte[] getFile(String filePath) {
-		try {
-			byte[] files = Files.readAllBytes(new File(filePath).toPath());
-			 return files;
-		} catch (IOException e) {
-			log.warn("Error when read file : {}",  e.getMessage());
-			return  null;
-		}
-		
-	}
-	/*
-	 * String fileName = StringUtils.cleanPath(file.getOriginalFilename()); Path
-	 * path = Paths.get(app.getRealPath(fileName));
-	 * Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-	 */
-	
 }
