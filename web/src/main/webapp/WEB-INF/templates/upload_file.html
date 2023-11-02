@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>The generated source code Web Application for Sakai</title>
+<!-- Latest compiled and minified CSS -->
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="/library/webjars/bootstrap/5.2.0/css/bootstrap.css">
+
+<!-- Font Awesome Icon -->
+<link rel="stylesheet" href="/library/webjars/fontawesome/4.7.0/css/font-awesome.css">
+
+</head>
+
+<style>
+	.main_storage{
+	    padding: 10px;
+	    margin: 20px 0;
+	    box-shadow: 1px 1px 3px 1px #bdb8b8;
+	    border-radius: 2px;
+	}
+	.main_storage .header_storage{
+		display: flex;
+	    justify-content: end;
+	    padding-bottom: 10px;
+	    border-bottom: 1px solid #bbb7b7;
+	}
+	.action_group button{
+		border : none;
+		background-color: transparent;
+	}
+</style>
+<body>
+
+    <div th:replace="~{fragments/header :: header}">Header</div>
+    <div class="container">
+    	<h3>My Storage</h3>
+    	<div th:if="${uploadSuccess != null}" class="alert alert-success" role="alert">
+		  [[${uploadSuccess}]]
+		</div>
+		<div th:if="${uploadError != null}" class="alert alert-danger" role="alert">
+		  [[${uploadError}]]
+		</div>
+    	
+    	<ul class="nav nav-tabs" id="myTab" role="tablist">
+		  <li class="nav-item" role="presentation">
+		    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#storage" type="button" role="tab" aria-controls="storage" aria-selected="true">Files</button>
+		  </li>
+		  <li class="nav-item" role="presentation">
+		    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bin" type="button" role="tab" aria-controls="bin" aria-selected="false">Recycle Bin</button>
+		  </li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+		  <div class="tab-pane fade show active" id="storage" role="tabpanel" tabindex="0">
+		  		<div class="main_storage">
+    		<div class="header_storage">
+    			<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+	    			<i class="fa fa-upload" aria-hidden="true"></i>
+	    			Upload file
+    			</button>
+    		</div>
+    		<div class="body_storage">
+    			<table class="table table-hover">
+					<thead>
+					    <tr>
+					      <th scope="col">#</th>
+					      <th scope="col">Name</th>
+					      <th scope="col">Action</th>
+					    </tr>
+					  </thead>
+					  <tbody>
+					    <tr th:each="file, iter : ${listFiles}">
+					      <td th:text="${iter.index + 1}"></td>
+					      <td>
+					      		<a th:href="@{'/storage/view-file/'+${file}}" th:text="${file}"></a>
+					      </td>
+					      <td class="action_group">
+						      <button th:onclick="changeName([[${file}]])" class="" data-bs-toggle="modal" data-bs-target="#editNameFileModal">
+						      	<i class="fa fa-pencil-square-o text-primary" aria-hidden="true"></i>
+						      </button>
+						      <a th:href="@{'/move-to-bin?fileName='+${file}}" class="">
+						      	<i class="fa fa-trash-o text-danger" aria-hidden="true"></i>
+						      </a>
+					      </td>
+					    </tr>
+					  </tbody>
+					</table>
+	    		</div>
+	    	</div>
+		  </div>
+		  <div class="tab-pane fade" id="bin" role="tabpanel" tabindex="0">
+		  		<div class="main_storage">
+    		<div class="body_storage">
+    			<table class="table table-hover">
+					<thead>
+					    <tr>
+					      <th scope="col">#</th>
+					      <th scope="col">Name</th>
+					      <th scope="col">Action</th>
+					    </tr>
+					  </thead>
+					  <tbody>
+					    <tr th:each="file, iter : ${listFilesBackup}">
+					      <td th:text="${iter.index + 1}"></td>
+					      <td>
+					      		<a th:href="@{'/bin/view-file/'+${file}}" th:text="${file}"></a>
+					      </td>
+					      <td class="action_group">
+						      <a th:href="@{'/restore-file/'+${file}}">
+						      	<i class="fa fa-refresh" aria-hidden="true"></i>
+						      </a>
+						      <a th:href="@{'/delete-file/'+${file}}" class="">
+						      	<i class="fa fa-trash-o text-danger" aria-hidden="true"></i>
+						      </a>
+					      </td>
+					    </tr>
+					  </tbody>
+					</table>
+	    		</div>
+	    	</div>
+		  </div>
+    	</div>
+    	
+    	
+    	
+    	
+    	<!-- Modal Upload File -->
+		<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <form th:action="@{/upload-file}" method="post" enctype="multipart/form-data" class="modal-content">
+		      <div class="modal-header">
+		        <h1 class="modal-title fs-5">Upload File</h1>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <div class="mb-3">
+				  <label for="formFile" class="form-label">Choose file to upload :</label>
+				  <input class="form-control" type="file" id="formFile" name="file_upload" required="required" accept="image/*">
+				</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		        <button type="submit" class="btn btn-primary">Upload File</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+    	<!-- End Modal Upload File -->
+    	
+    	
+  	    <!-- Modal edit name file -->
+		<div class="modal fade" id="editNameFileModal" tabindex="-1" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <form th:action="@{/edit-name-file}" method="post" class="modal-content">
+		    <div class="modal-header">
+		        <h1 class="modal-title fs-5">Edit Name File</h1>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <div class="mb-3">
+				  <label for="formFile" class="form-label">Type new name file :</label>
+				  <input class="form-control" type="hidden" name="oldName">
+				  <input class="form-control" type="text" name="newName">
+				</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		        <button type="submit" class="btn btn-primary">Update</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+    	<!-- End modal edit name file -->
+    	
+    	<!-- Modal Upload Success -->
+		<div class="modal fade" id="uploadSuccessModal" tabindex="-1" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <form th:action="@{/upload-file}" method="post" enctype="multipart/form-data" class="modal-content">
+		      <div class="modal-header">
+		        <h1 class="modal-title fs-5">Upload Success</h1>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <div class="mb-3">
+				  <h6>File has been upload successfully!</h6>
+				  <span id="nameFileUploaded"></span>
+				</div>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+    	<!-- End Modal Upload Success -->
+    </div>
+    <div th:insert="~{fragments/footer :: footer}">&copy; 2017 The MKS Group</div>
+
+<script type="text/javascript" src="/library/webjars/bootstrap/5.2.0/js/bootstrap.js"></script>
+<script type="text/javascript" src="/library/webjars/jquery/3.7.0/dist/jquery.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript" th:inline="javascript">
+  $(document).ready(function() {
+	 var nameFileUploaded = /*[[${nameFileUploaded}]]*/"";
+	 if(nameFileUploaded != null){
+		 $('#nameFileUploaded').text("File name : " +  nameFileUploaded);
+		 $('#uploadSuccessModal').modal('show'); 
+	 }
+  });
+</script>
+
+<script>
+	function changeName(nameFile){
+		/* $("input[name='newName']").text().effect( "highlight", {color:"#669966"}, 3000 ); */
+		$("input[name='oldName']").val(nameFile);
+		$("input[name='newName']").val(nameFile);
+	}
+	
+</script>
+</body>
+</html>

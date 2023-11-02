@@ -50,7 +50,7 @@ public class AppUtility {
         Document xmlDoc = null;
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db;
+        DocumentBuilder db; 
 
         try {
             db = dbf.newDocumentBuilder();

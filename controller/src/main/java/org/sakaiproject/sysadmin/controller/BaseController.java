@@ -85,7 +85,8 @@ public class BaseController {
 				log.debug("ComponentManager.get(SakaiProxy.class)=" + sakaiProxy);
 			} catch (Throwable th) {
 				// For Development environment, skip this exception
-				th.printStackTrace();
+				/* th.printStackTrace(); */
+				log.warn("This is development eviroment, skip this exception!");
 			}
 		}
 
@@ -99,7 +100,7 @@ public class BaseController {
         } else {
             // Demo for Web App
             httpSession.setAttribute("currentSiteId", "Default");
-            httpSession.setAttribute("userDisplayName", "Le Ngoc Thach");
+            httpSession.setAttribute("userDisplayName", "Tuan Kiet");
             httpSession.setAttribute("userEid", "ThachLN");
             httpSession.setAttribute("userEmail", "LNThach@gmail.com");
             httpSession.setAttribute("userFirstName", "Thach");
