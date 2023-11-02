@@ -84,9 +84,7 @@ public class BaseController {
 				sakaiProxy = ComponentManager.get(SakaiProxy.class);
 				log.debug("ComponentManager.get(SakaiProxy.class)=" + sakaiProxy);
 			} catch (Throwable th) {
-				// For Development environment, skip this exception
-				/* th.printStackTrace(); */
-				log.warn("This is development eviroment, skip this exception!");
+        log.info("In development, use Sakai proxy mock only.");
 			}
 		}
 
