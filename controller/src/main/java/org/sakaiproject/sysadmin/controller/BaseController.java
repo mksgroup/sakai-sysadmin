@@ -84,7 +84,7 @@ public class BaseController {
 				sakaiProxy = ComponentManager.get(SakaiProxy.class);
 				log.debug("ComponentManager.get(SakaiProxy.class)=" + sakaiProxy);
 			} catch (Throwable th) {
-				log.info("In development, use Sakai proxy mock only.");
+        log.info("In development, use Sakai proxy mock only.");
 			}
 		}
 
@@ -98,7 +98,7 @@ public class BaseController {
         } else {
             // Demo for Web App
             httpSession.setAttribute("currentSiteId", "Default");
-            httpSession.setAttribute("userDisplayName", "Le Ngoc Thach");
+            httpSession.setAttribute("userDisplayName", "Tuan Kiet");
             httpSession.setAttribute("userEid", "ThachLN");
             httpSession.setAttribute("userEmail", "LNThach@gmail.com");
             httpSession.setAttribute("userFirstName", "Thach");
