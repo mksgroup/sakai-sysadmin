@@ -75,7 +75,7 @@ public class HomeController extends BaseController {
 	 * Simply selects the home view to render by returning its name.
      * @return 
 	 */
-	@RequestMapping(value = {"/", "/home"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"/home"}, method = RequestMethod.GET)
 	public ModelAndView displayHome(HttpServletRequest request, HttpSession httpSession) {
 		ModelAndView mav = new ModelAndView("home");
 		initSession(request, httpSession);
@@ -84,7 +84,7 @@ public class HomeController extends BaseController {
 		return mav;
 	}
 	
-	@RequestMapping(value = "/upload-file", method = RequestMethod.GET)
+	@RequestMapping(value = {"/", "/upload-file"}, method = RequestMethod.GET)
 	public ModelAndView displayUploadFile(HttpServletRequest request, HttpSession httpSession) {
 		ModelAndView mav = new ModelAndView("upload_file");
 		initSession(request, httpSession);
