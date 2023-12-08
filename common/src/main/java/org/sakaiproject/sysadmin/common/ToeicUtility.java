@@ -2,11 +2,11 @@ package org.sakaiproject.sysadmin.common;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.sakaiproject.sysadmin.common.model.Question;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,33 +24,19 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ToeicUtility {
-	private static final String PATH_READ = "H:\\projects\\github.com\\Tuanskiet\\sakai-sysadmin\\ETS_2022_N1_processed.xlsx";
-	private static final String PATH_WRITE = "H:\\projects\\github.com\\Tuanskiet\\sakai-sysadmin\\ETS_2022_N1_processed_W.xlsx";
-	
-//	public static void main(String[] args) {
-//		List<List<Question>> dataToeicTest = readAllPart(PATH_READ);
-//		writeAllPart(dataToeicTest, PATH_WRITE);
-//
-//		
-////		ObjectMapper objectMapper = new ObjectMapper();
-////		try {
-////			objectMapper.writerWithDefaultPrettyPrinter().writeValue(System.out, dataPart);
-////		} catch (IOException e) {
-////			e.printStackTrace();
-////		}
-//	}
-	
+//	private static final String PATH_READ = "H:\\projects\\github.com\\Tuanskiet\\sakai-sysadmin\\ETS_2022_N1_processed.xlsx";
+//	private static final String PATH_WRITE = "H:\\projects\\github.com\\Tuanskiet\\sakai-sysadmin\\ETS_2022_N1_processed_W.xlsx";
 	
 	/**
 	 * Write all data to Excel file with sample format (write 7 part in TOEIC test).
 	 * @param dataToeicTest is a data you want to write into Excel file.
 	 * @param path is a file path you want to write.
 	 */
-	public static void writeAllPart(List<List<Question>> dataToeicTest, String path) {
+	public static void writeAllPart(List<List<Question>> dataToeicTest, String path, String outputPath) {
 		for(int i = 0; i < dataToeicTest.size(); i ++) {
 			List<Question> dataPart =  readDataToExcel(i + 1, path);
 			dataToeicTest.add(dataPart);
-			writeDataToExcel(i, PATH_WRITE, dataPart);
+			writeDataToExcel(i, outputPath, dataPart);
 		}
 	}
 	
