@@ -84,7 +84,7 @@ public class HomeController extends BaseController {
 		return mav;
 	}
 	
-	@RequestMapping(value = {"/", "/upload-file"}, method = RequestMethod.GET)
+	@RequestMapping(value="/upload-file", method = RequestMethod.GET)
 	public ModelAndView displayUploadFile(HttpServletRequest request, HttpSession httpSession) {
 		ModelAndView mav = new ModelAndView("upload_file");
 		initSession(request, httpSession);
