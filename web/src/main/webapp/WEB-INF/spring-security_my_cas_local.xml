@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans.xsd 
+http://www.springframework.org/schema/security 
+http://www.springframework.org/schema/security/spring-security-5.5.xsd">
+
+    
+    <beans:bean id="webexpressionHandler" 
+        class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" >
+    </beans:bean>
+
+	<!-- redirect the user’s browser to the CAS server -->
+	<beans:bean id="casAuthenticationEntryPoint" class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+        <beans:property name="loginUrl" value="https://myworkspace.vn/cas/login"></beans:property>
+        <beans:property name="serviceProperties" ref="serviceProperties"></beans:property>
+    </beans:bean>
+    
+    <http entry-point-ref="casAuthenticationEntryPoint" use-expressions="true">
+         <intercept-url pattern="/" access="isAuthenticated()" />
+         <intercept-url pattern="/**" access="isAuthenticated()" />
+         <intercept-url pattern="/cas-logout" access="permitAll"/>
+         <custom-filter position="CAS_FILTER" ref="casAuthenticationFilter"/>
+         <custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>
+		 <custom-filter ref="singleLogoutFilter" before="CAS_FILTER"/>
+     </http>
+
+
+     <beans:bean id="casAuthenticationFilter" class="org.springframework.security.cas.web.CasAuthenticationFilter">
+        <beans:property name="authenticationManager" ref="authenticationManager"></beans:property>
+    	<beans:property name="proxyGrantingTicketStorage" ref="pgtStorage"/>
+	<beans:property name="proxyReceptorUrl" value="/login/cas/proxyreceptor"/>
+    </beans:bean>
+    
+    
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="casAuthenticationProvider"></authentication-provider>
+    </authentication-manager>
+    
+    
+    <beans:bean id="casAuthenticationProvider" class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
+        <beans:property name="authenticationUserDetailsService">
+          <beans:bean class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+            <beans:constructor-arg ref="userService" />
+          </beans:bean>
+        </beans:property>
+        <beans:property name="serviceProperties" ref="serviceProperties"></beans:property>
+        <beans:property name="ticketValidator">
+            <beans:bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+                <beans:constructor-arg index="0" value="https://myworkspace.vn/cas"></beans:constructor-arg>
+            	<beans:property name="proxyCallbackUrl"
+		value="https://localhost:8443/cas-sample/login/cas/proxyreceptor"/>
+	<beans:property name="proxyGrantingTicketStorage" ref="pgtStorage"/>
+            </beans:bean>
+        </beans:property>
+        <beans:property name="key" value="cas"></beans:property>
+    </beans:bean>
+    
+    <beans:bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
+        <beans:property name="service" value="http://localhost:8080/sysadmin-web/j_spring_cas_security_check"></beans:property>
+        <beans:property name="sendRenew" value="false"></beans:property>
+    </beans:bean>
+
+    
+    <user-service id="userService">
+    	<user name="demo" password="{noop}demo" authorities="ROLE_ADMIN" />
+    </user-service>
+    
+    
+    <!-- This filter handles a Single Logout Request from the CAS Server -->
+	<beans:bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>
+
+    <!-- This filter redirects to the CAS Server to signal Single Logout should be performed -->
+    <beans:bean id="requestSingleLogoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+    	<beans:constructor-arg value="https://myworkspace.vn/cas/logout?service=http://localhost:8080/sysadmin-web"/>
+		<beans:constructor-arg>
+			<beans:bean class=
+				"org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+		</beans:constructor-arg>
+		<beans:property name="filterProcessesUrl" value="/logout/cas"/>
+    </beans:bean>
+    
+    <beans:bean id="pgtStorage" class="org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl"/>
+    
+    
+</beans:beans>
