@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>The generated source code Web Application for Sakai</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="/library/webjars/bootstrap/5.2.0/css/bootstrap.css">
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}">Header</div>
+    <div class="container">
+        <form id="signInForm" th:action="@{/do-sign-in}"  method="post" class="text-center w-50 mx-auto">
+		  <h4>Sign In</h4>
+		  <div class="mb-3 row">
+		    <label for="email" class="col-sm-2 col-form-label">Email</label>
+		    <div class="col-sm-10">
+		      <input type="text" class="form-control" id="email" name="_username" value="demo">
+		    </div>
+		  </div>
+		  <div class="mb-3 row">
+		    <label for="password" class="col-sm-2 col-form-label">Password</label>
+		    <div class="col-sm-10">
+		      <input type="password" class="form-control" id="password"  name="_password" value="demo">
+		    </div>
+		  </div>
+		  <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+        
+       
+        <div th:insert="~{fragments/footer :: footer}">&copy; 2017 The MKS Group</div>
+    </div>
+</body>
+
+<!--<script th:src="@{/assets/js/common.js}"></script>-->
+<script src="/library/webjars/jquery/dist/jquery.min.js"></script>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>The generated source code Web Application for Sakai</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="/library/webjars/bootstrap/5.2.0/css/bootstrap.css">
+</head>
+<body>
+
+    <div th:replace="~{fragments/header :: header}">Header</div>
+    <div class="container">
+        <!--<div class="text-center">
+			<a class="btn btn-primary" href="/sysadmin-web/logout/cas">Logout</a>
+			<a class="btn btn-primary" href="https://xlms.myworkspace.vn/direct/session/cas-shared-default-http://localhost:8080/sysadmin-web/">hi</a>
+			<div id="result"></div>
+        </div>-->
+        <th:block th:if="${sites != null}">
+			[[${sites}]]
+		</th:block>
+		<th:block th:if="${sites == null}">
+			No data present!
+		</th:block>
+         
+        
+    </div>
+    <div th:insert="~{fragments/footer :: footer}">&copy; 2017 The MKS Group</div>
+
+</body>
+<script src="/library/webjars/jquery/dist/jquery.min.js"></script>
+<script>
+	$(document).ready(function() {
+	    $('#get_site-btn').click(function(e){
+			console.log("get sites is running ...")
+	        $.ajax({
+				type : "GET",
+				url : "https://xlms.myworkspace.vn/direct/site.json",
+				processData: false,
+			    contentType: false
+			}).then(function(data) {
+				$('#result').text(data)
+				console.log("sites datas ::" + data)
+			}).fail(function(error){
+				$('#result').text(JSON.stringify(error))
+				console.error("error :: " + JSON.stringify(error))
+			})
+			;
+			
+	    });
+	});
+</script>
+</html>
