@@ -97,10 +97,7 @@ public class HomeController extends BaseController {
 	
 	@RequestMapping(value = "/upload-file", method = RequestMethod.POST)
 	public ModelAndView doUploadFile(
-			@RequestParam(name = "file_upload") MultipartFile multipartFile,
-			HttpServletRequest request, 
-			HttpSession httpSession,
-			Model model) {
+			@RequestParam(name = "file_upload") MultipartFile multipartFile) {
 		ModelAndView mav = new ModelAndView("upload_file");
 		// initSession(request, httpSession);
 
